@@ -24,7 +24,14 @@ namespace SMPScraper
                 //Download chromium browser if not available
                 using (var browserFetcher = new BrowserFetcher(Product.Chrome))
                 {
-                    await browserFetcher.DownloadAsync();
+                    if(browserFetcher.LocalRevisions().Count() == 0)
+                    {
+                        Console.WriteLine("Downloading Chromium...");
+
+                        await browserFetcher.DownloadAsync();
+
+                    }
+
                 }
 
                 
