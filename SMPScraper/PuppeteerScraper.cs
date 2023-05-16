@@ -30,6 +30,7 @@ namespace SMPScraper
 
                         await browserFetcher.DownloadAsync();
 
+                        Console.WriteLine("Downloading complete");
                     }
 
                 }
