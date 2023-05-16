@@ -124,7 +124,11 @@ namespace SMPScraper
                         //Show message box alert in Windows, however it will cause the thread to hang if it is not closed/interacted with
                         //System.Windows.Forms.MessageBox.Show("New Data updated!");
 
-                        SendEmailAlert(NewSMPTable,EmailToAddress);
+                        if(EmailNotification)
+                        {
+                            SendEmailAlert(NewSMPTable, EmailToAddress);
+                        }
+
 
                         var row = NewSMPTable.Rows[0];
 
