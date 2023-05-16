@@ -12,7 +12,8 @@ namespace SMPScraper
     {
 
         //Puppeteer Scraper uses the Puppeteer API to simulate a real chromium browser via the Chrome DevTools Protocol, often used for automated browser testing similar to Selenium
-        //Advantages: Can be run in either headless or headful mode, compatible with all websites by simulating real user activity
+        //Advantages: Can be run in either headless or headful mode, compatible with all websites by simulating real user activity, can connect to existing browser and use existing user profiles in all Chromium based browsers
+        //Disadvantages: Heavy weight, resource intensive
 
         public static async Task<DataTable> ScrapeData(Uri AESOSMPURL)
         {
@@ -26,7 +27,7 @@ namespace SMPScraper
                     await browserFetcher.DownloadAsync();
                 }
 
-
+                
                 using (var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Product = Product.Chrome, Headless = false }))
                 {
                     var page = await browser.NewPageAsync();
