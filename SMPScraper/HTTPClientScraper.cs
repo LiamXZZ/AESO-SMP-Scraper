@@ -17,62 +17,71 @@ namespace SMPScraper
         {
             DataTable SMPTable = new DataTable();
 
-            using (var Httpclient = new HttpClient())
+            try
             {
-                // Send a HTTP GET request to the URL to request the HTML document
-                var HTTPGetResponse = await Httpclient.GetAsync(AESOSMPURL);
-
-                if (HTTPGetResponse.IsSuccessStatusCode)
+                using (var Httpclient = new HttpClient())
                 {
-                    //Get the entire HTML document in string format
-                    var HTMLContent = await HTTPGetResponse.Content.ReadAsStringAsync();
+                    // Send a HTTP GET request to the URL to request the HTML document
+                    var HTTPGetResponse = await Httpclient.GetAsync(AESOSMPURL);
 
-                    DataTable Datatable = new DataTable();
-
-                    //Get all content inside the HTML tag, which in this case is table
-                    var Tables = GetContentByHTMLTag(HTMLContent, "table");
-
-                    //There are 4 tables on the website in total, the one we are interested in is the 3rd one
-                    var PriceTable = Tables[2];
-
-                    var Rows = GetContentByHTMLTag(PriceTable, "tr");
-
-                    //Get headers and column names which is the first row of the table
-                    var Headers = GetContentByHTMLTag(Rows.First(), "th");
-
-                    foreach (var Column in Headers)
+                    if (HTTPGetResponse.IsSuccessStatusCode)
                     {
-                        var ColumnName = GetInnerTextByElement(Column);
+                        //Get the entire HTML document in string format
+                        var HTMLContent = await HTTPGetResponse.Content.ReadAsStringAsync();
 
-                        Datatable.Columns.Add(new DataColumn(ColumnName));
-                    }
+                        DataTable Datatable = new DataTable();
 
+                        //Get all content inside the HTML tag, which in this case is table
+                        var Tables = GetContentByHTMLTag(HTMLContent, "table");
 
-                    //Get row values
-                    for (int Rowindex = 1; Rowindex < Rows.Count; Rowindex++)
-                    {
-                        var Row = Rows[Rowindex];
+                        //There are 4 tables on the website in total, the one we are interested in is the 3rd one
+                        var PriceTable = Tables[2];
 
-                        var Datarow = Datatable.NewRow();
+                        var Rows = GetContentByHTMLTag(PriceTable, "tr");
 
-                        var Cells = GetContentByHTMLTag(Row, "td");
+                        //Get headers and column names which is the first row of the table
+                        var Headers = GetContentByHTMLTag(Rows.First(), "th");
 
-                        for (int Cellindex = 0; Cellindex < Cells.Count; Cellindex++)
+                        foreach (var Column in Headers)
                         {
-                            var CellValue = GetInnerTextByElement(Cells[Cellindex]);
+                            var ColumnName = GetInnerTextByElement(Column);
 
-                            Datarow[Cellindex] = CellValue;
+                            Datatable.Columns.Add(new DataColumn(ColumnName));
+                        }
+
+
+                        //Get row values
+                        for (int Rowindex = 1; Rowindex < Rows.Count; Rowindex++)
+                        {
+                            var Row = Rows[Rowindex];
+
+                            var Datarow = Datatable.NewRow();
+
+                            var Cells = GetContentByHTMLTag(Row, "td");
+
+                            for (int Cellindex = 0; Cellindex < Cells.Count; Cellindex++)
+                            {
+                                var CellValue = GetInnerTextByElement(Cells[Cellindex]);
+
+                                Datarow[Cellindex] = CellValue;
+
+                            }
+
+                            Datatable.Rows.Add(Datarow);
 
                         }
 
-                        Datatable.Rows.Add(Datarow);
-
+                        SMPTable = Datatable;
                     }
 
-                    SMPTable = Datatable;
                 }
-
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+
 
             return SMPTable;
 

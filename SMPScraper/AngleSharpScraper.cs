@@ -11,7 +11,6 @@ namespace SMPScraper
     internal class AngleSharpScraper
     {
 
-
         //AngleSharp Scraper uses the popular HTML parser AngleSharp, there are other similar tools such as HTML Agility Pack etc.
         //Advantages: Good Library for parsing HTML documents, less code, easier to read
         //Disadvantages: May not work with websites that require JavaScript or implements anti-bot detection
@@ -20,36 +19,43 @@ namespace SMPScraper
 
             var SMPTable = new DataTable();
 
-            //Get the DOM
-            var Document = await BrowsingContext.New(Configuration.Default.WithDefaultLoader()).OpenAsync(AESOSMPURL.AbsoluteUri);
-
-            //Select the table with the attribute of border = 1 which is our desired table and the only table that has such attribute
-            var table = Document.QuerySelector("table[border = \"1\"]");
-
-            //Get headers
-            var headers = table.GetElementsByTagName("th");
-
-            foreach (var column in headers)
+            try
             {
-                //Get the innerText content of each header column
-                SMPTable.Columns.Add(new DataColumn(column.TextContent));
-            }
+                //Get the DOM
+                var Document = await BrowsingContext.New(Configuration.Default.WithDefaultLoader()).OpenAsync(AESOSMPURL.AbsoluteUri);
 
-            //Select all rows in the table that has td as child elements so that we do not select the headers again
-            var rows = table.QuerySelectorAll("tr:has(td)");
+                //Select the table with the attribute of border = 1 which is our desired table and the only table that has such attribute
+                var table = Document.QuerySelector("table[border = \"1\"]");
 
-            foreach (var row in rows)
-            {
-                var cells = row.GetElementsByTagName("td");
+                //Get headers
+                var headers = table.GetElementsByTagName("th");
 
-                var Newrow = SMPTable.NewRow();
-
-                for (int cellindex = 0; cellindex < cells.Length; cellindex++)
+                foreach (var column in headers)
                 {
-                    Newrow[cellindex] = cells[cellindex].TextContent;
+                    //Get the innerText content of each header column
+                    SMPTable.Columns.Add(new DataColumn(column.TextContent));
                 }
 
-                SMPTable.Rows.Add(Newrow);
+                //Select all rows in the table that has td as child elements so that we do not select the headers again
+                var rows = table.QuerySelectorAll("tr:has(td)");
+
+                foreach (var row in rows)
+                {
+                    var cells = row.GetElementsByTagName("td");
+
+                    var Newrow = SMPTable.NewRow();
+
+                    for (int cellindex = 0; cellindex < cells.Length; cellindex++)
+                    {
+                        Newrow[cellindex] = cells[cellindex].TextContent;
+                    }
+
+                    SMPTable.Rows.Add(Newrow);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return SMPTable;
